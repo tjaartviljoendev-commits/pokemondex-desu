@@ -1,0 +1,49 @@
+package za.co.dvt.jaartviljoen.pokedexdesu.core.network.di
+
+import com.squareup.moshi.Moshi
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.dsl.module
+import retrofit2.Retrofit
+import retrofit2.converter.moshi.MoshiConverterFactory
+import za.co.dvt.jaartviljoen.pokedexdesu.core.network.BuildConfig
+import za.co.dvt.jaartviljoen.pokedexdesu.core.network.api.ApiService
+import java.util.concurrent.TimeUnit
+
+private const val BASE_URL = "https://pokeapi.co/api/v2/"
+private const val TIMEOUT_SECONDS = 30L
+
+val networkModule = module {
+
+    single {
+        Moshi.Builder().build()
+    }
+
+    single {
+        OkHttpClient.Builder()
+            .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .apply {
+                if (BuildConfig.DEBUG) {
+                    addInterceptor(
+                        HttpLoggingInterceptor().apply {
+                            level = HttpLoggingInterceptor.Level.BODY
+                        }
+                    )
+                }
+            }
+            .build()
+    }
+
+    single {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(get())
+            .addConverterFactory(MoshiConverterFactory.create(get()))
+            .build()
+    }
+
+    single<ApiService> {
+        get<Retrofit>().create(ApiService::class.java)
+    }
+}
