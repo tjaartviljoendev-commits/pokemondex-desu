@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">Pokedex Desu</string>
+    <string name="search_placeholder">Search Pokemon…</string>
+    <string name="error_title">Something went wrong</string>
+    <string name="error_retry">Try Again</string>
+    <string name="empty_search_title">No Pokemon found</string>
+    <string name="empty_search_message">Try a different search term</string>
+    <string name="select_pokemon_prompt">Select a Pokemon to view details</string>
+    <string name="stats_section">Base Stats</string>
+    <string name="abilities_section">Abilities</string>
+    <string name="physical_section">Physical</string>
+    <string name="height_label">Height</string>
+    <string name="weight_label">Weight</string>
+    <string name="hp_label">HP</string>
+    <string name="attack_label">Attack</string>
+    <string name="loading_pokemon">Loading Pokemon…</string>
+    <string name="content_desc_pokemon_sprite">Pokemon sprite</string>
+    <string name="content_desc_back">Navigate back</string>
+    <string name="content_desc_search">Search Pokemon</string>
+    <string name="content_desc_pokeball">Pokeball</string>
+</resources>
