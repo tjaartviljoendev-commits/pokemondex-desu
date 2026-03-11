@@ -30,7 +30,7 @@ class InfoViewModel(
         _uiState.value = InfoUiState.Loading
 
         viewModelScope.launch {
-            when (val result = getPokemonDetail.execute(pokemonId)) {
+            when (val result = getPokemonDetail(pokemonId)) {
                 is Result.Success -> _uiState.value = InfoUiState.Success(result.data)
                 is Result.Error -> _uiState.value = InfoUiState.Error(
                     message = result.message ?: result.exception.localizedMessage.orEmpty()

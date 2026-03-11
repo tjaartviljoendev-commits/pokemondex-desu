@@ -6,6 +6,6 @@ import za.co.dvt.jaartviljoen.pokedexdesu.core.foundation.Result
 
 class SearchPokemonUseCase(private val repository: PokemonRepository) {
 
-    suspend fun execute(query: String): Result<List<Pokemon>> =
+    suspend operator fun invoke(query: String): Result<List<Pokemon>> =
         repository.searchPokemon(query = query)
 }

@@ -6,6 +6,6 @@ import za.co.dvt.jaartviljoen.pokedexdesu.core.foundation.Result
 
 class RefreshPokemonListUseCase(private val repository: PokemonRepository) {
 
-    suspend fun execute(limit: Int, offset: Int): Result<List<Pokemon>> =
+    suspend operator fun invoke(limit: Int, offset: Int): Result<List<Pokemon>> =
         repository.refreshPokemonList(limit = limit, offset = offset)
 }

@@ -6,6 +6,6 @@ import za.co.dvt.jaartviljoen.pokedexdesu.core.foundation.Result
 
 class GetPokemonDetailUseCase(private val repository: PokemonRepository) {
 
-    suspend fun execute(id: Int): Result<PokemonDetail> =
+    suspend operator fun invoke(id: Int): Result<PokemonDetail> =
         repository.getPokemonDetail(id)
 }

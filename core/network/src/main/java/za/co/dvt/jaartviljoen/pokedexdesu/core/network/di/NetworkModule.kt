@@ -10,8 +10,10 @@ import za.co.dvt.jaartviljoen.pokedexdesu.core.network.BuildConfig
 import za.co.dvt.jaartviljoen.pokedexdesu.core.network.api.ApiService
 import java.util.concurrent.TimeUnit
 
-private const val BASE_URL = "https://pokeapi.co/api/v2/"
-private const val TIMEOUT_SECONDS = 30L
+internal object NetworkConfig {
+    const val BASE_URL = "https://pokeapi.co/api/v2/"
+    const val TIMEOUT_SECONDS = 30L
+}
 
 val networkModule = module {
 
@@ -21,8 +23,8 @@ val networkModule = module {
 
     single {
         OkHttpClient.Builder()
-            .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
-            .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .connectTimeout(NetworkConfig.TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .readTimeout(NetworkConfig.TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .apply {
                 if (BuildConfig.DEBUG) {
                     addInterceptor(
@@ -37,7 +39,7 @@ val networkModule = module {
 
     single {
         Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(NetworkConfig.BASE_URL)
             .client(get())
             .addConverterFactory(MoshiConverterFactory.create(get()))
             .build()

@@ -35,7 +35,7 @@ class InfoViewModelTest {
 
     @Test
     fun `initial load emits loading state before coroutine executes`() = runTest {
-        coEvery { getPokemonDetail.execute(POKEMON_ID) } returns Result.Success(testDetail())
+        coEvery { getPokemonDetail(POKEMON_ID) } returns Result.Success(testDetail())
 
         val viewModel = buildViewModel()
 
@@ -45,7 +45,7 @@ class InfoViewModelTest {
     @Test
     fun `initial load transitions to success with correct pokemon detail`() = runTest {
         val detail = testDetail()
-        coEvery { getPokemonDetail.execute(POKEMON_ID) } returns Result.Success(detail)
+        coEvery { getPokemonDetail(POKEMON_ID) } returns Result.Success(detail)
 
         val viewModel = buildViewModel()
         advanceUntilIdle()
@@ -68,7 +68,7 @@ class InfoViewModelTest {
             abilities = listOf("static", "lightning-rod"),
             types = listOf("electric")
         )
-        coEvery { getPokemonDetail.execute(POKEMON_ID) } returns Result.Success(detail)
+        coEvery { getPokemonDetail(POKEMON_ID) } returns Result.Success(detail)
 
         val viewModel = buildViewModel()
         advanceUntilIdle()
@@ -90,7 +90,7 @@ class InfoViewModelTest {
 
     @Test
     fun `initial load emits error state when use case returns failure`() = runTest {
-        coEvery { getPokemonDetail.execute(POKEMON_ID) } returns
+        coEvery { getPokemonDetail(POKEMON_ID) } returns
             Result.Error(RuntimeException("not found"), "not found")
 
         val viewModel = buildViewModel()
@@ -104,7 +104,7 @@ class InfoViewModelTest {
     @Test
     fun `error state uses exception localizedMessage when result message is null`() = runTest {
         val exception = RuntimeException("exception message")
-        coEvery { getPokemonDetail.execute(POKEMON_ID) } returns Result.Error(exception, message = null)
+        coEvery { getPokemonDetail(POKEMON_ID) } returns Result.Error(exception, message = null)
 
         val viewModel = buildViewModel()
         advanceUntilIdle()
@@ -115,7 +115,7 @@ class InfoViewModelTest {
 
     @Test
     fun `retry reloads detail and transitions to success`() = runTest {
-        coEvery { getPokemonDetail.execute(POKEMON_ID) } returnsMany listOf(
+        coEvery { getPokemonDetail(POKEMON_ID) } returnsMany listOf(
             Result.Error(RuntimeException("timeout"), "timeout"),
             Result.Success(testDetail())
         )
@@ -132,7 +132,7 @@ class InfoViewModelTest {
     @Test
     fun `retry transitions through loading before settling on success`() = runTest {
         val detail = testDetail()
-        coEvery { getPokemonDetail.execute(POKEMON_ID) } returnsMany listOf(
+        coEvery { getPokemonDetail(POKEMON_ID) } returnsMany listOf(
             Result.Error(RuntimeException("err"), "err"),
             Result.Success(detail)
         )
@@ -156,7 +156,7 @@ class InfoViewModelTest {
 
     @Test
     fun `retry calls use case with the same pokemon id`() = runTest {
-        coEvery { getPokemonDetail.execute(POKEMON_ID) } returns Result.Success(testDetail())
+        coEvery { getPokemonDetail(POKEMON_ID) } returns Result.Success(testDetail())
 
         val viewModel = buildViewModel()
         advanceUntilIdle()
@@ -164,7 +164,7 @@ class InfoViewModelTest {
         viewModel.onRetry()
         advanceUntilIdle()
 
-        coVerify(exactly = 2) { getPokemonDetail.execute(POKEMON_ID) }
+        coVerify(exactly = 2) { getPokemonDetail(POKEMON_ID) }
     }
 
     private fun buildViewModel(): InfoViewModel =

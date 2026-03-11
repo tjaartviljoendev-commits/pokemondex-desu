@@ -68,7 +68,7 @@ class HomeViewModel(
 
         viewModelScope.launch {
             when (val result =
-                getPokemonList.execute(limit = HomeConstants.PAGE_SIZE, offset = currentOffset)) {
+                getPokemonList(limit = HomeConstants.PAGE_SIZE, offset = currentOffset)) {
                 is Result.Success -> {
                     val newList = result.data
                     currentOffset += newList.size
@@ -92,7 +92,7 @@ class HomeViewModel(
 
         viewModelScope.launch {
             when (val result =
-                refreshPokemonList.execute(limit = HomeConstants.PAGE_SIZE, offset = 0)) {
+                refreshPokemonList(limit = HomeConstants.PAGE_SIZE, offset = 0)) {
                 is Result.Success -> {
                     currentOffset = result.data.size
                     _uiState.update { state ->
@@ -132,7 +132,7 @@ class HomeViewModel(
     }
 
     private suspend fun executeSearch(query: String) {
-        when (val result = searchPokemon.execute(query)) {
+        when (val result = searchPokemon(query)) {
             is Result.Success -> {
                 _uiState.update { state ->
                     if (state.searchQuery == query) {
@@ -159,7 +159,7 @@ class HomeViewModel(
         _uiState.update { it.copy(isLoading = true, error = null) }
 
         viewModelScope.launch {
-            when (val result = getPokemonList.execute(limit = HomeConstants.PAGE_SIZE, offset = 0)) {
+            when (val result = getPokemonList(limit = HomeConstants.PAGE_SIZE, offset = 0)) {
                 is Result.Success -> {
                     currentOffset = result.data.size
                     _uiState.update { state ->

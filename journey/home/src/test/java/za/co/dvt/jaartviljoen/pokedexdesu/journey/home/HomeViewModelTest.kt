@@ -44,7 +44,7 @@ class HomeViewModelTest {
 
     @Test
     fun `initial load emits loading state before coroutine executes`() = runTest {
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = 0) } returns
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = 0) } returns
             Result.Success(createPokemonList(20))
 
         val viewModel = buildViewModel()
@@ -55,7 +55,7 @@ class HomeViewModelTest {
     @Test
     fun `initial load transitions to success and populates pokemon list`() = runTest {
         val expected = createPokemonList(20)
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = 0) } returns Result.Success(expected)
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = 0) } returns Result.Success(expected)
 
         val viewModel = buildViewModel()
         advanceUntilIdle()
@@ -69,7 +69,7 @@ class HomeViewModelTest {
 
     @Test
     fun `initial load with full page marks canLoadMore as true`() = runTest {
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = 0) } returns
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = 0) } returns
             Result.Success(createPokemonList(PAGE_SIZE))
 
         val viewModel = buildViewModel()
@@ -80,7 +80,7 @@ class HomeViewModelTest {
 
     @Test
     fun `initial load with partial page marks canLoadMore as false`() = runTest {
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = 0) } returns
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = 0) } returns
             Result.Success(createPokemonList(5))
 
         val viewModel = buildViewModel()
@@ -91,7 +91,7 @@ class HomeViewModelTest {
 
     @Test
     fun `initial load error with empty list sets error state`() = runTest {
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = 0) } returns
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = 0) } returns
             Result.Error(RuntimeException("network error"), "network error")
 
         val viewModel = buildViewModel()
@@ -108,8 +108,8 @@ class HomeViewModelTest {
     fun `load more appends new items to existing list`() = runTest {
         val firstPage = createPokemonList(PAGE_SIZE)
         val secondPage = createPokemonList(PAGE_SIZE, startId = PAGE_SIZE + 1)
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = 0) } returns Result.Success(firstPage)
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = PAGE_SIZE) } returns Result.Success(secondPage)
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = 0) } returns Result.Success(firstPage)
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = PAGE_SIZE) } returns Result.Success(secondPage)
 
         val viewModel = buildViewModel()
         advanceUntilIdle()
@@ -122,21 +122,21 @@ class HomeViewModelTest {
 
     @Test
     fun `load more does not trigger while already loading initial page`() = runTest {
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = 0) } returns
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = 0) } returns
             Result.Success(createPokemonList(PAGE_SIZE))
 
         val viewModel = buildViewModel()
         viewModel.onLoadMore()
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { getPokemonList.execute(limit = PAGE_SIZE, offset = 0) }
+        coVerify(exactly = 1) { getPokemonList(limit = PAGE_SIZE, offset = 0) }
     }
 
     @Test
     fun `load more does not trigger while already paginating`() = runTest {
         val firstPage = createPokemonList(PAGE_SIZE)
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = 0) } returns Result.Success(firstPage)
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = PAGE_SIZE) } returns
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = 0) } returns Result.Success(firstPage)
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = PAGE_SIZE) } returns
             Result.Success(createPokemonList(PAGE_SIZE, startId = PAGE_SIZE + 1))
 
         val viewModel = buildViewModel()
@@ -146,14 +146,14 @@ class HomeViewModelTest {
         viewModel.onLoadMore()
         advanceUntilIdle()
 
-        coVerify(exactly = 2) { getPokemonList.execute(any(), any()) }
+        coVerify(exactly = 2) { getPokemonList(any(), any()) }
     }
 
     @Test
     fun `load more sets canLoadMore to false when fewer than page size items returned`() = runTest {
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = 0) } returns
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = 0) } returns
             Result.Success(createPokemonList(PAGE_SIZE))
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = PAGE_SIZE) } returns
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = PAGE_SIZE) } returns
             Result.Success(createPokemonList(3, startId = PAGE_SIZE + 1))
 
         val viewModel = buildViewModel()
@@ -167,7 +167,7 @@ class HomeViewModelTest {
 
     @Test
     fun `load more does not trigger when canLoadMore is false`() = runTest {
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = 0) } returns
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = 0) } returns
             Result.Success(createPokemonList(3))
 
         val viewModel = buildViewModel()
@@ -176,15 +176,15 @@ class HomeViewModelTest {
         viewModel.onLoadMore()
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { getPokemonList.execute(limit = PAGE_SIZE, offset = 0) }
+        coVerify(exactly = 1) { getPokemonList(limit = PAGE_SIZE, offset = 0) }
     }
 
     @Test
     fun `search query triggers use case and populates displayList with results`() = runTest {
         val searchResults = listOf(createPokemon(4, name = "charmander"))
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = 0) } returns
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = 0) } returns
             Result.Success(createPokemonList(3))
-        coEvery { searchPokemon.execute("char") } returns Result.Success(searchResults)
+        coEvery { searchPokemon("char") } returns Result.Success(searchResults)
 
         val viewModel = buildViewModel()
         advanceUntilIdle()
@@ -198,9 +198,9 @@ class HomeViewModelTest {
 
     @Test
     fun `search with no results shows empty state`() = runTest {
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = 0) } returns
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = 0) } returns
             Result.Success(createPokemonList(3))
-        coEvery { searchPokemon.execute("zzznomatch") } returns Result.Success(emptyList())
+        coEvery { searchPokemon("zzznomatch") } returns Result.Success(emptyList())
 
         val viewModel = buildViewModel()
         advanceUntilIdle()
@@ -218,8 +218,8 @@ class HomeViewModelTest {
     @Test
     fun `clearing search query restores full pokemon list in displayList`() = runTest {
         val list = createPokemonList(5)
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = 0) } returns Result.Success(list)
-        coEvery { searchPokemon.execute("pokemon-1") } returns Result.Success(listOf(createPokemon(1)))
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = 0) } returns Result.Success(list)
+        coEvery { searchPokemon("pokemon-1") } returns Result.Success(listOf(createPokemon(1)))
 
         val viewModel = buildViewModel()
         advanceUntilIdle()
@@ -236,7 +236,7 @@ class HomeViewModelTest {
 
     @Test
     fun `blank search query does not show empty state`() = runTest {
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = 0) } returns
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = 0) } returns
             Result.Success(createPokemonList(5))
 
         val viewModel = buildViewModel()
@@ -251,8 +251,8 @@ class HomeViewModelTest {
     fun `refresh replaces existing list with fresh data`() = runTest {
         val initialList = createPokemonList(PAGE_SIZE)
         val refreshedList = createPokemonList(PAGE_SIZE, startId = 100)
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = 0) } returns Result.Success(initialList)
-        coEvery { refreshPokemonList.execute(limit = PAGE_SIZE, offset = 0) } returns Result.Success(refreshedList)
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = 0) } returns Result.Success(initialList)
+        coEvery { refreshPokemonList(limit = PAGE_SIZE, offset = 0) } returns Result.Success(refreshedList)
 
         val viewModel = buildViewModel()
         advanceUntilIdle()
@@ -270,11 +270,11 @@ class HomeViewModelTest {
     @Test
     fun `refresh resets pagination offset so next load-more starts from correct position`() = runTest {
         val refreshedList = createPokemonList(PAGE_SIZE, startId = 100)
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = 0) } returns
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = 0) } returns
             Result.Success(createPokemonList(PAGE_SIZE))
-        coEvery { refreshPokemonList.execute(limit = PAGE_SIZE, offset = 0) } returns
+        coEvery { refreshPokemonList(limit = PAGE_SIZE, offset = 0) } returns
             Result.Success(refreshedList)
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = PAGE_SIZE) } returns
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = PAGE_SIZE) } returns
             Result.Success(createPokemonList(PAGE_SIZE, startId = PAGE_SIZE + 100))
 
         val viewModel = buildViewModel()
@@ -286,14 +286,14 @@ class HomeViewModelTest {
         viewModel.onLoadMore()
         advanceUntilIdle()
 
-        coVerify { getPokemonList.execute(limit = PAGE_SIZE, offset = PAGE_SIZE) }
+        coVerify { getPokemonList(limit = PAGE_SIZE, offset = PAGE_SIZE) }
     }
 
     @Test
     fun `refresh failure preserves existing list and sets error message`() = runTest {
         val existingList = createPokemonList(PAGE_SIZE)
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = 0) } returns Result.Success(existingList)
-        coEvery { refreshPokemonList.execute(limit = PAGE_SIZE, offset = 0) } returns
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = 0) } returns Result.Success(existingList)
+        coEvery { refreshPokemonList(limit = PAGE_SIZE, offset = 0) } returns
             Result.Error(RuntimeException("server error"), "server error")
 
         val viewModel = buildViewModel()
@@ -314,7 +314,7 @@ class HomeViewModelTest {
     fun `retry after error clears error and reloads first page`() = runTest {
         val errorResult = Result.Error(RuntimeException("timeout"), "timeout")
         val successResult = Result.Success(createPokemonList(PAGE_SIZE))
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = 0) } returnsMany listOf(errorResult, successResult)
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = 0) } returnsMany listOf(errorResult, successResult)
 
         val viewModel = buildViewModel()
         advanceUntilIdle()
@@ -330,7 +330,7 @@ class HomeViewModelTest {
 
     @Test
     fun `retry transitions through loading before settling on success`() = runTest {
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = 0) } returnsMany listOf(
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = 0) } returnsMany listOf(
             Result.Error(RuntimeException("err"), "err"),
             Result.Success(createPokemonList(PAGE_SIZE))
         )
@@ -361,7 +361,7 @@ class HomeViewModelTest {
 
     @Test
     fun `selecting a pokemon updates selectedPokemonId in state`() = runTest {
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = 0) } returns
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = 0) } returns
             Result.Success(createPokemonList(PAGE_SIZE))
 
         val viewModel = buildViewModel()
@@ -375,7 +375,7 @@ class HomeViewModelTest {
 
     @Test
     fun `selected pokemon id is restored from SavedStateHandle on creation`() = runTest {
-        coEvery { getPokemonList.execute(limit = PAGE_SIZE, offset = 0) } returns
+        coEvery { getPokemonList(limit = PAGE_SIZE, offset = 0) } returns
             Result.Success(createPokemonList(PAGE_SIZE))
 
         val savedState = SavedStateHandle(mapOf(HomeConstants.SAVED_STATE_SELECTED_ID to 7))

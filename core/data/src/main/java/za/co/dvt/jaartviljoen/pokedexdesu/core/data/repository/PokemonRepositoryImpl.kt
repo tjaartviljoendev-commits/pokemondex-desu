@@ -17,8 +17,6 @@ import za.co.dvt.jaartviljoen.pokedexdesu.core.foundation.DispatcherProvider
 import za.co.dvt.jaartviljoen.pokedexdesu.core.foundation.Result
 import za.co.dvt.jaartviljoen.pokedexdesu.core.network.api.ApiService
 
-private const val FULL_INDEX_LIMIT = 100
-
 internal class PokemonRepositoryImpl(
     private val apiService: ApiService,
     private val dao: PokemonDao,
@@ -42,14 +40,12 @@ internal class PokemonRepositoryImpl(
                 }
 
                 val response = apiService.getPokemonList(limit = limit, offset = offset)
-                val basicList = response.results.map {
-                    it.toDomain()
-                }
-                val enriched = fetchDetailsAndEnrich(basicList)
-                dao.upsertPokemonList(enriched.map {
-                    it.toEntity()
-                })
-                Result.Success(enriched)
+                val basicList = response.results.map { it.toDomain() }
+                val enriched = fetchDetailsAndEnrich(basicList.map { it.id })
+                val enrichedById = enriched.associateBy { it.id }
+                val finalList = basicList.map { enrichedById[it.id] ?: it }
+                dao.upsertPokemonList(finalList.map { it.toEntity() })
+                Result.Success(finalList)
             } catch (e: Exception) {
                 dao.getPokemonList(limit, offset)
                     .takeIf { it.isNotEmpty() }
@@ -85,9 +81,11 @@ internal class PokemonRepositoryImpl(
             try {
                 val response = apiService.getPokemonList(limit = limit, offset = offset)
                 val basicList = response.results.map { it.toDomain() }
-                val enriched = fetchDetailsAndEnrich(basicList)
-                dao.upsertPokemonList(enriched.map { it.toEntity() })
-                Result.Success(enriched)
+                val enriched = fetchDetailsAndEnrich(basicList.map { it.id })
+                val enrichedById = enriched.associateBy { it.id }
+                val finalList = basicList.map { enrichedById[it.id] ?: it }
+                dao.upsertPokemonList(finalList.map { it.toEntity() })
+                Result.Success(finalList)
             } catch (e: Exception) {
                 Result.Error(exception = e, message = e.message)
             }
@@ -99,7 +97,7 @@ internal class PokemonRepositoryImpl(
                 ensureFullIndexCached()
                 val results = dao.searchByName(query).map { it.toDomain() }
                 val needsEnrichment = results.filter { it.hp == null }
-                val enriched = fetchDetailsAndEnrich(needsEnrichment)
+                val enriched = fetchDetailsAndEnrich(needsEnrichment.map { it.id })
                 if (enriched.isEmpty()) {
                     Result.Success(results)
                 } else {
@@ -134,19 +132,23 @@ internal class PokemonRepositoryImpl(
         }
     }
 
-    private suspend fun fetchDetailsAndEnrich(basicList: List<Pokemon>): List<Pokemon> =
+    private suspend fun fetchDetailsAndEnrich(ids: List<Int>): List<Pokemon> =
         coroutineScope {
-            basicList.map { pokemon ->
+            ids.map { id ->
                 async {
                     try {
-                        val detailResponse = apiService.getPokemonDetail(pokemon.id)
+                        val detailResponse = apiService.getPokemonDetail(id)
                         val detail = detailResponse.toDomain()
                         dao.insertPokemonDetail(detail.toEntity())
                         detail.toSummary()
                     } catch (_: Exception) {
-                        pokemon
+                        null
                     }
                 }
-            }.awaitAll()
+            }.awaitAll().filterNotNull()
         }
+
+    private companion object {
+        const val FULL_INDEX_LIMIT = 100
+    }
 }
