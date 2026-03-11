@@ -17,7 +17,7 @@ import za.co.dvt.jaartviljoen.pokedexdesu.core.foundation.DispatcherProvider
 import za.co.dvt.jaartviljoen.pokedexdesu.core.foundation.Result
 import za.co.dvt.jaartviljoen.pokedexdesu.core.network.api.ApiService
 
-private const val FULL_INDEX_LIMIT = 1302
+private const val FULL_INDEX_LIMIT = 100
 
 internal class PokemonRepositoryImpl(
     private val apiService: ApiService,

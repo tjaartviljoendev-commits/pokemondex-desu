@@ -76,7 +76,7 @@ class HomeViewModel(
                         current.copy(
                             pokemonList = current.pokemonList + newList,
                             isPaginating = false,
-                            canLoadMore = newList.size == HomeConstants.PAGE_SIZE
+                            canLoadMore = newList.size == HomeConstants.PAGE_SIZE && currentOffset < HomeConstants.MAX_POKEMON
                         )
                     }
                 }
@@ -100,7 +100,7 @@ class HomeViewModel(
                             pokemonList = result.data,
                             isRefreshing = false,
                             error = null,
-                            canLoadMore = result.data.size == HomeConstants.PAGE_SIZE
+                            canLoadMore = result.data.size == HomeConstants.PAGE_SIZE && currentOffset < HomeConstants.MAX_POKEMON
                         )
                     }
                 }
@@ -166,7 +166,7 @@ class HomeViewModel(
                         state.copy(
                             pokemonList = result.data,
                             isLoading = false,
-                            canLoadMore = result.data.size == HomeConstants.PAGE_SIZE
+                            canLoadMore = result.data.size == HomeConstants.PAGE_SIZE && currentOffset < HomeConstants.MAX_POKEMON
                         )
                     }
                 }
