@@ -10,6 +10,15 @@ import za.co.dvt.jaartviljoen.pokedexdesu.core.network.BuildConfig
 import za.co.dvt.jaartviljoen.pokedexdesu.core.network.api.ApiService
 import java.util.concurrent.TimeUnit
 
+// In a production application, BASE_URL should be sourced from a BuildConfig field
+// configured per build variant (e.g. debug vs release) in the module's build.gradle.kts:
+//
+//   buildTypes {
+//       debug { buildConfigField("String", "BASE_URL", "\"https://staging-api.example.com/\"") }
+//       release { buildConfigField("String", "BASE_URL", "\"https://api.example.com/\"") }
+//   }
+//
+// Then referenced as: BuildConfig.BASE_URL
 internal object NetworkConfig {
     const val BASE_URL = "https://pokeapi.co/api/v2/"
     const val TIMEOUT_SECONDS = 30L
